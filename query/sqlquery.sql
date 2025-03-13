@@ -240,3 +240,5 @@ VALUES
 (6, 'admin1', 'admin1@example.com');
 
 select count(*) as book_count from issued_books where readerID = 1;
+
+select b.title, b.isbn, a.authorName, i.issuedate, i.duedate, r.fname, r.lname from books b join issued_books i on b.bookID = i.bookID join readers r on r.readerID = i.readerID join authors a on a.authorID = b.authorID;
