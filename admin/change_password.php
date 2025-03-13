@@ -1,6 +1,11 @@
 <?php
     require("functions.php");
     session_start();
+if (!isset($_SESSION["email"])) {
+  header("Location:../index.php");
+} else if ($_SESSION["who"] != "admin") {
+  header("Location:../index.php");
+}
 ?>
 <!DOCTYPE html>
 <html>
