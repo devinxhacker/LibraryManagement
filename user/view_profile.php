@@ -35,9 +35,15 @@ while ($row = mysqli_fetch_assoc($query_run)) {
             <div class="navbar-header">
                 <a class="navbar-brand" href="view_profile.php">Library Management System (LMS)</a>
             </div>
-            <font style="color: white"><span><strong>Welcome: <?php echo $_SESSION['name']; ?></strong></span></font>
-            <font style="color: white"><span><strong>Email: <?php echo $_SESSION['email']; ?></strong></font>
+            <div style="position: fixed; top: 20px; left: 50%;">
+                <font style="color:blue; margin-top: 10px;"><span><strong>Welcome:
+                            <?php echo $_SESSION['name']; ?></strong></span>
+                </font>
+                <font style="color:blue; margin-top: 10px;"><span><strong>Email:
+                            <?php echo $_SESSION['email']; ?></strong></font>
+            </div>
             <ul class="nav navbar-nav navbar-right">
+                <li class="nav-item"><a class="nav-link" href="user_dashboard.php">Dashboard</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
                     <div class="dropdown-menu">

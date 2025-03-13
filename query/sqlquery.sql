@@ -192,8 +192,38 @@ VALUES
 
 
 INSERT INTO issued_books (bookID, readerID, issuedate)
-VALUES (1, 1, '2025-03-01');
+VALUES (5, 1, '2025-03-06');
 
+
+ALTER TABLE auth
+ADD emailID varchar(100) not null;
+
+INSERT INTO auth (password, emailID)
+VALUES 
+('admin1', 'admin1@example.com'),
+('admin2', 'admin2@example.com'),
+('admin3', 'admin3@example.com'),
+('admin4', 'admin4@example.com'),
+('admin5', 'admin5@example.com');
+
+UPDATE auth
+SET emailID = 'carol.white@example.com'
+WHERE loginID = 5;
+
+-- jane.smith@example.com
+-- alice.williams@example.com
+-- bob.johnson@example.com
+-- carol.white@example.com
+
+
+ALTER TABLE auth
+ADD UNIQUE (emailID);
+
+ALTER TABLE readers
+ADD UNIQUE (email);
+
+ALTER TABLE admins
+ADD UNIQUE (email);
 
 SELECT * FROM admins;
 SELECT * FROM auth;
@@ -203,3 +233,10 @@ SELECT * FROM categories;
 SELECT * FROM issued_books;
 SELECT * FROM publishers;
 SELECT * FROM readers;
+
+delete from auth where loginID = 11;
+INSERT INTO auth (loginID, password, emailID)
+VALUES 
+(6, 'admin1', 'admin1@example.com');
+
+select count(*) as book_count from issued_books where readerID = 1;

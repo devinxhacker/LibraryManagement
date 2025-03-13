@@ -18,18 +18,21 @@ $db = mysqli_select_db($connection, "lms");
             background: rgba(245, 245, 245, 0.9);
             padding: 50px;
         }
+
         table {
             background: rgba(245, 245, 245, 0.9);
             padding: 50px;
             text-align: center;
             margin: auto;
         }
-        td{
+
+        td {
             padding: 10px;
             text-align: center;
             margin: auto;
         }
-        th{
+
+        th {
             padding: 10px;
             text-align: center;
             margin: auto;
@@ -42,11 +45,17 @@ $db = mysqli_select_db($connection, "lms");
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="user_dashboard.php">Library Management System (LMS)</a>
+                <a class="navbar-brand" href="../index.php">Library Management System (LMS)</a>
             </div>
-            <font style="color: white"><span><strong>Welcome: <?php echo $_SESSION['name']; ?></strong></span></font>
-            <font style="color: white"><span><strong>Email: <?php echo $_SESSION['email']; ?></strong></font>
+            <div style="position: fixed; top: 20px; left: 50%;">
+                <font style="color:blue; margin-top: 10px;"><span><strong>Welcome:
+                            <?php echo $_SESSION['name']; ?></strong></span></font>
+                <font style="color:blue; margin-top: 10px;"><span><strong>Email:
+                            <?php echo $_SESSION['email']; ?>
+                        </strong></font>
+            </div>
             <ul class="nav navbar-nav navbar-right">
+                <li class="nav-item"><a class="nav-link" href="user_dashboard.php">Dashboard</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
                     <div class="dropdown-menu">
@@ -91,13 +100,13 @@ $db = mysqli_select_db($connection, "lms");
                     <?php
                     $query = "select bookID, issuedate, duedate, fines, delaydays from issued_books where readerID = '$_SESSION[id]'";
                     $result = mysqli_query($connection, $query);
-                    while ($row = mysqli_fetch_array($result)) {
-                        // echo $row["bookID"] . " ";
-                        // echo $row["issuedate"] . " ";
-                        // echo $row["duedate"] . " ";
-                        // echo $row["fines"] . " ";
-                        // if row is null
-                        if (mysqli_num_rows($result) > 0) {
+                    if (mysqli_num_rows($result) > 0) {
+                        while ($row = mysqli_fetch_array($result)) {
+                            // echo $row["bookID"] . " ";
+                            // echo $row["issuedate"] . " ";
+                            // echo $row["duedate"] . " ";
+                            // echo $row["fines"] . " ";
+                            // if row is null
                             $book_id = $row["bookID"];
                             $issuedate = $row["issuedate"];
                             $duedate = $row["duedate"];
@@ -126,7 +135,7 @@ $db = mysqli_select_db($connection, "lms");
                             $row5 = mysqli_fetch_array($result5);
                             $category_name = $row5["categoryName"];
                             echo "<tr>";
-                            echo "<td>". $isbn ."</td>";
+                            echo "<td>" . $isbn . "</td>";
                             echo "<td>" . $book_name . "</td>";
                             echo "<td>" . $author_name . "</td>";
                             echo "<td>" . $publisher_name . "</td>";
@@ -138,10 +147,11 @@ $db = mysqli_select_db($connection, "lms");
                             echo "<td>" . $delaydays . "</td>";
                             echo "<td>" . $fines . "</td>";
                             echo "</tr>";
-                        } else {
-                            echo "<tr> <td colspan=10> No book had been issued! </td> </tr>";
                         }
+                    } else {
+                        echo "<tr><td colspan='11'>No Book Issued</td></tr>";
                     }
+
                     ?>
                 </table>
             </form>

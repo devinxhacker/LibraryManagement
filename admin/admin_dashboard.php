@@ -15,10 +15,13 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="admin_dashboard.php">Library Management System (LMS)</a>
+                <a class="navbar-brand" href="../index.php">Library Management System (LMS)</a>
             </div>
-            <font style="color: white"><span><strong>Welcome: <?php echo $_SESSION['name'];?></strong></span></font>
-            <font style="color: white"><span><strong>Email: <?php echo $_SESSION['email'];?></strong></font>
+            <div style="position: fixed; top: 20px; left: 50%;">
+            <font style="color:blue; margin-top: 10px;"><span><strong>Welcome: <?php echo $_SESSION['name']; ?></strong></span>
+                </font>
+                <font style="color:blue; margin-top: 10px;"><span><strong>Email: <?php echo $_SESSION['email']; ?></strong></font>
+            </div>
             <ul class="nav navbar-nav navbar-right">
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
@@ -79,7 +82,7 @@
                 <div class="card-header">Registered User</div>
                 <div class="card-body">
                     <p class="card-text">No. total Users: <?php echo get_user_count();?></p>
-                    <a class="btn btn-danger" href="Regusers.php" target="_blank">View Registered Users</a>
+                    <a class="btn btn-danger" href="Regusers.php">View Registered Users</a>
                 </div>
             </div>
         </div>
@@ -88,7 +91,7 @@
                 <div class="card-header">Total Book</div>
                 <div class="card-body">
                     <p class="card-text">No of books available: <?php echo get_book_count();?></p>
-                    <a class="btn btn-success" href="Regbooks.php" target="_blank">View All Books</a>
+                    <a class="btn btn-success" href="Regbooks.php">View All Books</a>
                 </div>
             </div>
         </div>
@@ -97,7 +100,7 @@
                 <div class="card-header">Book Categories</div>
                 <div class="card-body">
                     <p class="card-text">No of Book's Categories: <?php echo get_category_count();?></p>
-                    <a class="btn btn-warning" href="Regcat.php" target="_blank">View Categories</a>
+                    <a class="btn btn-warning" href="Regcat.php">View Categories</a>
                 </div>
             </div>
         </div>
@@ -106,7 +109,7 @@
                 <div class="card-header">No. of Authors</div>
                 <div class="card-body">
                     <p class="card-text">No of Authors: <?php echo get_author_count();?></p>
-                    <a class="btn btn-primary" href="Regauthor.php" target="_blank">View Authors</a>
+                    <a class="btn btn-primary" href="Regauthor.php">View Authors</a>
                 </div>
             </div>
         </div>
@@ -117,7 +120,7 @@
                 <div class="card-header">Book Issued</div>
                 <div class="card-body">
                     <p class="card-text">No of book issued: <?php echo get_issue_book_count();?></p>
-                    <a class="btn btn-success" href="view_issued_book.php" target="_blank">View Issued Books</a>
+                    <a class="btn btn-success" href="view_issued_book.php">View Issued Books</a>
                 </div>
             </div>
         </div>

@@ -24,7 +24,7 @@ session_start();
 
     body {
         background: rgba(245, 245, 245, 0.4);
-        background-image: url("https://img.freepik.com/free-photo/abundant-collection-antique-books-wooden-shelves-generated-by-ai_188544-29660.jpg?size=626&amp;ext=jpg&amp;ga=GA1.1.1546980028.1704240000&amp;semt=sph");
+        /* background-image: url("https://img.freepik.com/free-photo/abundant-collection-antique-books-wooden-shelves-generated-by-ai_188544-29660.jpg?size=626&amp;ext=jpg&amp;ga=GA1.1.1546980028.1704240000&amp;semt=sph"); */
     }
 </style>
 
@@ -81,7 +81,7 @@ session_start();
                             <label for="password">Password:</label>
                             <input type="password" name="password" class="form-control" required>
                         </div>
-                        <button type="submit" name="login" class="btn btn-primary">Admin Login</button> |
+                        <button type="submit" name="login" class="btn btn-primary">Admin Login</button>
                         <!-- <a href="signup.php"> Signup now !!</a> -->
                     </form>
                 <?php else: ?>
@@ -110,6 +110,7 @@ session_start();
                             $_SESSION['name'] = $row['fname'] . " " . $row['lname'];
                             $_SESSION['email'] = $row['email'];
                             $_SESSION['id'] = $row['id'];
+                            $_SESSION['who'] = "admin";
                             echo "<script>localStorage.setItem('adminID', '{$_SESSION['id']}');</script>";
                             header("Location: admin/admin_dashboard.php");
                         } else {

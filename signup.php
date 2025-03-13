@@ -18,7 +18,7 @@
     }
     body{
       background: rgba(245, 245, 245, 0.4);
-      background-image: url("https://img.freepik.com/free-photo/abundant-collection-antique-books-wooden-shelves-generated-by-ai_188544-29660.jpg?size=626&amp;ext=jpg&amp;ga=GA1.1.1546980028.1704240000&amp;semt=sph");
+      /* background-image: url("https://img.freepik.com/free-photo/abundant-collection-antique-books-wooden-shelves-generated-by-ai_188544-29660.jpg?size=626&amp;ext=jpg&amp;ga=GA1.1.1546980028.1704240000&amp;semt=sph"); */
    }
 </style>
 <body>
@@ -32,7 +32,7 @@
                   <a class="nav-link" href="index.php">User Login</a>
                 </li>
               <li class="nav-item">
-                <a class="nav-link" href="admin/indexad.php">Admin Login</a>
+                <a class="nav-link" href="admin_login.php">Admin Login</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="signup.php"></span>Signup</a>

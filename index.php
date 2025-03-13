@@ -24,7 +24,7 @@ session_start();
 
     body {
         background: rgba(245, 245, 245, 0.4);
-        background-image: url("https://img.freepik.com/free-photo/abundant-collection-antique-books-wooden-shelves-generated-by-ai_188544-29660.jpg?size=626&amp;ext=jpg&amp;ga=GA1.1.1546980028.1704240000&amp;semt=sph");
+        /* background-image: url("https://img.freepik.com/free-photo/abundant-collection-antique-books-wooden-shelves-generated-by-ai_188544-29660.jpg?size=626&amp;ext=jpg&amp;ga=GA1.1.1546980028.1704240000&amp;semt=sph"); */
     }
 </style>
 
@@ -34,10 +34,57 @@ session_start();
             <div class="navbar-header">
                 <a class="navbar-brand" href="index.php">Library Management System</a>
             </div>
-            <?php if (isset($_SESSION['name'])) : ?>
-                <font style="color: white"><span><strong>Welcome: <?php echo $_SESSION['name']; ?></strong></span></font>
-                <font style="color: white"><span><strong>Email: <?php echo $_SESSION['email']; ?></strong></font>
+            <?php if (!isset($_SESSION['name'])): ?>
                 <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php">User Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_login.php">Admin Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="signup.php"></span>Signup</a>
+                    </li>
+                </ul>
+                
+            <?php elseif ($_SESSION['who'] == "admin"): ?>
+                <div style="position: fixed; top: 20px; left: 50%;">
+                    <font style="color:blue; margin-top: 10px;"><span><strong>Welcome:
+                                <?php echo $_SESSION['name']; ?></strong></span>
+                    </font>
+                    <font style="color:blue; margin-top: 10px;"><span><strong>Email:
+                                <?php echo $_SESSION['email']; ?></strong></font>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin/admin_dashboard.php">Dashboard</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="admin/view_profile.php">View Profile</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="admin/edit_profile.php">Edit Profile</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="admin/change_password.php">Change Password</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../logout.php">Logout</a>
+                    </li>
+                </ul>
+            <?php else: ?>
+                <div style="position: fixed; top: 20px; left: 50%;">
+                    <font style="color:blue; margin-top: 10px;"><span><strong>Welcome:
+                                <?php echo $_SESSION['name']; ?></strong></span>
+                    </font>
+                    <font style="color:blue; margin-top: 10px;"><span><strong>Email:
+                                <?php echo $_SESSION['email']; ?></strong></font>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item">
+                        <a class="nav-link" href="user/user_dashboard.php">Dashboard</a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
                         <div class="dropdown-menu">
@@ -52,18 +99,6 @@ session_start();
                         <a class="nav-link" href="../logout.php">Logout</a>
                     </li>
                 </ul>
-            <?php else: ?>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.php">User Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="admin_login.php">Admin Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="signup.php"></span>Signup</a>
-                </li>
-            </ul>
             <?php endif; ?>
         </div>
     </nav>
@@ -87,11 +122,11 @@ session_start();
             </ul>
         </div>
         <div class="col-md-8" id="main_content">
-            <center>
-                <h3>User Login Form</h3>
-            </center>
             <div id="login-section">
                 <?php if (!isset($_SESSION['email'])): ?>
+                    <center>
+                        <h3>User Login Form</h3>
+                    </center>
                     <form action="" method="post">
                         <div class="form-group">
                             <label for="email">Email ID:</label>
@@ -103,9 +138,21 @@ session_start();
                         </div>
                         <button type="submit" name="login" class="btn btn-primary">Login</button> |
                         <a href="signup.php"> Signup now !!</a>
-                        
+
+                    </form>
+                <?php elseif ($_SESSION['who'] == 'admin'): ?>
+                    <center>
+                        <h3>ADMIN</h3>
+                    </center>
+                    <p>Welcome, Admin <?php echo $_SESSION['name']; ?>!</p>
+                    <p>Email: <?php echo $_SESSION['email']; ?></p>
+                    <form action="" method="post">
+                        <button type="submit" name="logout" class="btn btn-danger">Logout</button>
                     </form>
                 <?php else: ?>
+                    <center>
+                        <h3>USER</h3>
+                    </center>
                     <p>Welcome, <?php echo $_SESSION['name']; ?>!</p>
                     <p>Email: <?php echo $_SESSION['email']; ?></p>
                     <form action="" method="post">
@@ -131,6 +178,7 @@ session_start();
                             $_SESSION['name'] = $row['fname'] . " " . $row['lname'];
                             $_SESSION['email'] = $row['email'];
                             $_SESSION['id'] = $row['readerID'];
+                            $_SESSION['who'] = "reader";
                             echo "<script>localStorage.setItem('userID', '{$_SESSION['id']}');</script>";
                             header("Location: user/user_dashboard.php");
                         } else {
