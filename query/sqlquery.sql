@@ -85,6 +85,17 @@ CREATE TABLE issued_books (
     FOREIGN KEY (readerID) REFERENCES readers(readerID)
 );
 
+
+CREATE TABLE activity_logs (
+    log_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    activity_type VARCHAR(50) NOT NULL,
+    description TEXT NOT NULL,
+    user_type VARCHAR(20) NOT NULL,
+    user_email VARCHAR(100) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    details JSON
+);
+
 -- Enable the event scheduler for automatic updates
 SET GLOBAL event_scheduler = ON;
 
@@ -225,6 +236,8 @@ ADD UNIQUE (email);
 ALTER TABLE admins
 ADD UNIQUE (email);
 
+
+use lms;
 SELECT * FROM admins;
 SELECT * FROM auth;
 SELECT * FROM authors;

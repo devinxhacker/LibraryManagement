@@ -9,7 +9,7 @@ if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
 }
 
 // Get all issued books for dropdown
-$issued_books = get_all_issued_books();
+$issued_books = get_all_issued_books_with_details();
 
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['return'])) {

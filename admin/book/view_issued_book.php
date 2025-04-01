@@ -8,6 +8,25 @@ if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
     exit();
 }
 
+// Process book return if form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['return_book'])) {
+    $issue_id = $_POST['issue_id'];
+    
+    if (empty($issue_id)) {
+        $_SESSION['error_message'] = "Please select a book to return.";
+    } else {
+        if (return_book($issue_id)) {
+            $_SESSION['success_message'] = "Book returned successfully.";
+        } else {
+            $_SESSION['error_message'] = "Error returning book.";
+        }
+    }
+    
+    // Redirect to clear the POST data
+    header("Location: view_issued_book.php");
+    exit();
+}
+
 // Get all issued books with details
 $issued_books = get_all_issued_books_with_details();
 ?>
@@ -76,11 +95,8 @@ $issued_books = get_all_issued_books_with_details();
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"><i class="fas fa-book-reader"></i> Issued Books</h4>
                 <div>
-                    <a href="issue_book.php" class="btn btn-primary me-2">
+                    <a href="issue_book.php" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Issue New Book
-                    </a>
-                    <a href="return_book.php" class="btn btn-success">
-                        <i class="fas fa-undo"></i> Return Book
                     </a>
                 </div>
             </div>
@@ -121,10 +137,14 @@ $issued_books = get_all_issued_books_with_details();
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="return_book.php?id=<?php echo $book['issue_id']; ?>" 
-                                               class="btn btn-sm btn-success" title="Return Book">
-                                                <i class="fas fa-undo"></i>
-                                            </a>
+                                            <form method="POST" action="" style="display: inline;">
+                                                <input type="hidden" name="issue_id" value="<?php echo $book['issue_id']; ?>">
+                                                <button type="submit" name="return_book" class="btn btn-sm btn-success" 
+                                                        onclick="return confirm('Are you sure you want to return this book?')" 
+                                                        title="Return Book">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            </form>
                                             <a href="view_book_details.php?id=<?php echo $book['bookID']; ?>" 
                                                class="btn btn-sm btn-info" title="View Details">
                                                 <i class="fas fa-eye"></i>

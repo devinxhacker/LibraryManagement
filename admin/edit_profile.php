@@ -13,8 +13,8 @@ $admin = get_admin_profile($_SESSION['email']);
 
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
-    $name = $_POST['name'];
-    $mobile = $_POST['mobile'];
+    $name = $_POST['fname'] . ' ' . $_POST['lname'];
+    $mobile = $_POST['phone_no'];
     
     // Validate input
     if (empty($name) || empty($mobile)) {
@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($admin['name']); ?>
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($admin['fname'] . ' ' . $admin['lname']); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
@@ -109,11 +109,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                             </div>
                             <div class="mb-3">
                                 <label for="name" class="form-label"><i class="fas fa-user"></i> Name</label>
-                                <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($admin['name']); ?>" required>
+                                <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($admin['fname'] . ' ' . $admin['lname']); ?>" required>
                             </div>
                             <div class="mb-3">
                                 <label for="mobile" class="form-label"><i class="fas fa-phone"></i> Mobile Number</label>
-                                <input type="tel" class="form-control" id="mobile" name="mobile" value="<?php echo htmlspecialchars($admin['mobile']); ?>" required>
+                                <input type="tel" class="form-control" id="mobile" name="mobile" value="<?php echo htmlspecialchars($admin['phone_no']); ?>" required>
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" name="update" class="btn btn-primary">

@@ -82,7 +82,7 @@ $books = get_all_books_with_details();
                                     <td><?php echo htmlspecialchars($book['categoryName']); ?></td>
                                     <td>$<?php echo number_format($book['price'], 2); ?></td>
                                     <td>
-                                        <?php if ($book['status'] == 'available'): ?>
+                                        <?php if ($book['status'] == 0): ?>
                                             <span class="badge bg-success">Available</span>
                                         <?php else: ?>
                                             <span class="badge bg-warning">Issued</span>
@@ -98,7 +98,7 @@ $books = get_all_books_with_details();
                                                class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <?php if ($book['status'] == 'available'): ?>
+                                            <?php if ($book['status'] == 0): ?>
                                                 <form method="POST" action="delete_book.php" class="d-inline" 
                                                       onsubmit="return confirm('Are you sure you want to delete this book?');">
                                                     <input type="hidden" name="book_id" value="<?php echo $book['bookID']; ?>">

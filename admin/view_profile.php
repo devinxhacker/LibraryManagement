@@ -35,7 +35,7 @@ $admin = get_admin_profile($_SESSION['email']);
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($admin['name']); ?>
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($admin['fname'] . ' ' . $admin['lname']); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item active" href="view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
@@ -64,7 +64,7 @@ $admin = get_admin_profile($_SESSION['email']);
                                 <i class="fas fa-user-circle fa-5x text-primary"></i>
                             </div>
                             <div class="col-md-8">
-                                <h5 class="card-title"><?php echo htmlspecialchars($admin['name']); ?></h5>
+                                <h5 class="card-title"><?php echo htmlspecialchars($admin['fname'] . ' ' . $admin['lname']); ?></h5>
                                 <p class="card-text text-muted">Administrator</p>
                             </div>
                         </div>
@@ -76,7 +76,7 @@ $admin = get_admin_profile($_SESSION['email']);
                         
                         <div class="mb-3">
                             <label class="form-label"><i class="fas fa-phone"></i> Mobile Number</label>
-                            <p class="form-control-static"><?php echo htmlspecialchars($admin['mobile']); ?></p>
+                            <p class="form-control-static"><?php echo htmlspecialchars($admin['phone_no']); ?></p>
                         </div>
                         
                         <div class="d-grid gap-2">

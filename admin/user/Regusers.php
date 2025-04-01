@@ -1,161 +1,139 @@
 <?php
+require("../functions.php");
 session_start();
-#fetch data from database
-$connection = mysqli_connect("localhost", "root", "28092008");
-$db = mysqli_select_db($connection, "lms");
-$fname = "";
-$lname = "";
-$email = "";
-$password = "";
-$phone_no = "";
-$address = "";
-$query = "select * from readers";
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
+    header("Location: ../../index.php");
+    exit();
+}
+
+// Get all readers
+$readers = get_all_readers();
+
+// Handle reader deletion
+if (isset($_POST['delete']) && isset($_POST['reader_id'])) {
+    $reader_id = $_POST['reader_id'];
+    if (delete_reader($reader_id)) {
+        $_SESSION['success_message'] = "Reader deleted successfully.";
+    } else {
+        $_SESSION['error_message'] = "Error deleting reader.";
+    }
+    header("Location: Regusers.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>All Reg Users</title>
-    <meta charset="utf-8" name="viewport" content="width=device-width,intial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <style>
-        #side_bar {
-            background: rgba(245, 245, 245, 0.9);
-            padding: 50px;
-        }
-
-        table {
-            background: rgba(245, 245, 245, 0.9);
-            padding: 50px;
-            text-align: center;
-            margin: auto;
-        }
-
-        td {
-            padding: 10px;
-            text-align: center;
-            margin: auto;
-        }
-
-        th {
-            padding: 10px;
-            text-align: center;
-            margin: auto;
-            background: rgba(222, 222, 222, 0.95);
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Readers - Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="../../css/common.css" rel="stylesheet">
 </head>
-
 <body>
+    <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="../index.php">Library Management System (LMS)</a>
+            <a class="navbar-brand" href="../admin_dashboard.php">
+                <i class="fas fa-book-reader"></i> Library Management System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['name']); ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="../view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
+                            <li><a class="dropdown-item" href="../edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                            <li><a class="dropdown-item" href="../change_password.php"><i class="fas fa-key"></i> Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
-            <div style="position: fixed; top: 20px; left: 50%;">
-            <font style="color:blue; margin-top: 10px;"><span><strong>Welcome: <?php echo $_SESSION['name']; ?></strong></span></font>
-            <font style="color:blue; margin-top: 10px;"><span><strong>Email: <?php echo $_SESSION['email']; ?></strong></font>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?php 
+                echo $_SESSION['success_message'];
+                unset($_SESSION['success_message']);
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#">View Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Edit Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="change_password.php">Change Password</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../logout.php">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </nav><br>
-    
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd">
-        <div class="container-fluid">
+        <?php endif; ?>
 
-            <ul class="nav navbar-nav navbar-center">
-                <li class="nav-item">
-                    <a class="nav-link" href="admin_dashboard.php">Dashboard</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Books </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_book.php">Add New Book</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_book.php">Manage Books</a>
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Category </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_cat.php">Add New Category</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_cat.php">Manage Category</a>
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Authors</a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_author.php">Add New Author</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_author.php">Manage Author</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="issue_book.php">Issue Book</a>
-                </li>
-            </ul>
-        </div>
-    </nav><br>
-    <span>
-        <marquee>This is library mangement system. Library opens at 8:00 AM and close at 8:00 PM</marquee>
-    </span><br><br>
-    <center>
-        <h4>Registered Users Detail</h4><br>
-    </center>
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php 
+                echo $_SESSION['error_message'];
+                unset($_SESSION['error_message']);
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
 
-    <div class="row">
-        <div class="col-md-2"></div>
-        <div class="col-md-8">
-            <form>
-                <table class="table-bordered" width="900px" style="text-align: center">
-                    <tr>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>Email</th>
-                        <th>Address</th>
-                    </tr>
-
-                    <?php
-                    $query_run = mysqli_query($connection, $query);
-                    while ($row = mysqli_fetch_assoc($query_run)) {
-                        $fname = $row['fname'];
-                        $lname = $row['lname'];
-                        $name = $fname . ' ' . $lname;
-                        $email = $row['email'];
-                        $phone_no = $row['phone_no'];
-                        $address = $row['address'];
-                        ?>
-                        <tr>
-                            <td><?php echo $name; ?></td>
-                            <td><?php echo $email; ?></td>
-                            <td><?php echo $phone_no; ?></td>
-                            <td><?php echo $address; ?></td>
-                        </tr>
-                        <?php
-                    }
-                    ?>
-                </table>
-            </form>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-users"></i> Manage Readers</h4>
+                <a href="add_reader.php" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Reader
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while($reader = mysqli_fetch_assoc($readers)): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($reader['fname'] . ' ' . $reader['lname']); ?></td>
+                                    <td><?php echo htmlspecialchars($reader['email']); ?></td>
+                                    <td><?php echo htmlspecialchars($reader['phone_no']); ?></td>
+                                    <td><?php echo htmlspecialchars($reader['address']); ?></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="edit_reader.php?id=<?php echo $reader['readerID']; ?>" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="" class="d-inline" 
+                                                  onsubmit="return confirm('Are you sure you want to delete this reader?');">
+                                                <input type="hidden" name="reader_id" value="<?php echo $reader['readerID']; ?>">
+                                                <button type="submit" name="delete" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2"></div>
     </div>
-</body>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

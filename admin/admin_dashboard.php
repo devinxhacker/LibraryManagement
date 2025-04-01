@@ -239,13 +239,96 @@ $admin_profile = get_admin_profile($_SESSION['email']);
                         <div class="recent-activity">
                             <?php if (!empty($recent_activities)): ?>
                                 <?php foreach($recent_activities as $activity): ?>
-                                <div class="activity-item">
-                                    <i class="fas fa-circle text-primary"></i>
-                                    <?php echo htmlspecialchars($activity['description']); ?>
-                                    <small class="text-muted float-end">
-                                        <?php echo $activity['timestamp']; ?>
-                                    </small>
-                                </div>
+                                    <div class="activity-item">
+                                        <?php
+                                        // Set icon and color based on activity type
+                                        $icon = 'fa-circle';
+                                        $color = 'primary';
+                                        switch($activity['type']) {
+                                            case 'book_issue':
+                                                $icon = 'fa-book-reader';
+                                                $color = 'success';
+                                                break;
+                                            case 'book_return':
+                                                $icon = 'fa-undo';
+                                                $color = 'info';
+                                                break;
+                                            case 'book_add':
+                                                $icon = 'fa-plus-circle';
+                                                $color = 'success';
+                                                break;
+                                            case 'book_delete':
+                                                $icon = 'fa-trash';
+                                                $color = 'danger';
+                                                break;
+                                            case 'reader_add':
+                                                $icon = 'fa-user-plus';
+                                                $color = 'success';
+                                                break;
+                                            case 'reader_update':
+                                                $icon = 'fa-user-edit';
+                                                $color = 'warning';
+                                                break;
+                                            case 'reader_delete':
+                                                $icon = 'fa-user-minus';
+                                                $color = 'danger';
+                                                break;
+                                            case 'admin_add':
+                                                $icon = 'fa-user-shield';
+                                                $color = 'success';
+                                                break;
+                                            case 'admin_update':
+                                                $icon = 'fa-user-shield';
+                                                $color = 'warning';
+                                                break;
+                                            case 'admin_delete':
+                                                $icon = 'fa-user-shield';
+                                                $color = 'danger';
+                                                break;
+                                            case 'category_add':
+                                                $icon = 'fa-tags';
+                                                $color = 'success';
+                                                break;
+                                            case 'category_update':
+                                                $icon = 'fa-tags';
+                                                $color = 'warning';
+                                                break;
+                                            case 'category_delete':
+                                                $icon = 'fa-tags';
+                                                $color = 'danger';
+                                                break;
+                                            case 'author_add':
+                                                $icon = 'fa-pen-fancy';
+                                                $color = 'success';
+                                                break;
+                                            case 'author_update':
+                                                $icon = 'fa-pen-fancy';
+                                                $color = 'warning';
+                                                break;
+                                            case 'author_delete':
+                                                $icon = 'fa-pen-fancy';
+                                                $color = 'danger';
+                                                break;
+                                            case 'publisher_add':
+                                                $icon = 'fa-building';
+                                                $color = 'success';
+                                                break;
+                                            case 'publisher_update':
+                                                $icon = 'fa-building';
+                                                $color = 'warning';
+                                                break;
+                                            case 'publisher_delete':
+                                                $icon = 'fa-building';
+                                                $color = 'danger';
+                                                break;
+                                        }
+                                        ?>
+                                        <i class="fas <?php echo $icon; ?> text-<?php echo $color; ?>"></i>
+                                        <?php echo htmlspecialchars($activity['description']); ?>
+                                        <small class="text-muted float-end">
+                                            <?php echo $activity['timestamp']; ?>
+                                        </small>
+                                    </div>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <div class="alert alert-info">

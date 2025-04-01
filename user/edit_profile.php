@@ -1,5 +1,6 @@
 <?php
 require("../config/database.php");
+require("../admin/functions.php");
 session_start();
 
 // Check if user is logged in and is a reader
@@ -10,8 +11,11 @@ if (!isset($_SESSION["email"]) || $_SESSION["who"] != "reader") {
 
 // Get user's profile information
 $user_id = $_SESSION['id'];
-$user_query = "SELECT * FROM readers WHERE readerID = '$user_id'";
-$user_result = mysqli_query($conn, $user_query);
+$user_query = "SELECT * FROM readers WHERE readerID = ?";
+$stmt = mysqli_prepare($conn, $user_query);
+mysqli_stmt_bind_param($stmt, "i", $user_id);
+mysqli_stmt_execute($stmt);
+$user_result = mysqli_stmt_get_result($stmt);
 $user = mysqli_fetch_assoc($user_result);
 
 // Process form submission
@@ -21,20 +25,52 @@ if (isset($_POST['update_profile'])) {
     $phone_no = mysqli_real_escape_string($conn, $_POST['phone_no']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
 
-    $update_query = "UPDATE readers SET 
-                    fname = '$fname',
-                    lname = '$lname',
-                    phone_no = '$phone_no',
-                    address = '$address'
-                    WHERE readerID = '$user_id'";
-
-    if (mysqli_query($conn, $update_query)) {
-        $_SESSION['success_message'] = "Profile updated successfully!";
-        $_SESSION['name'] = $fname . " " . $lname;
-        header("Location: view_profile.php");
-        exit();
-    } else {
+    // Start transaction
+    mysqli_begin_transaction($conn);
+    
+    try {
+        // Update reader profile
+        $update_query = "UPDATE readers SET 
+                        fname = ?,
+                        lname = ?,
+                        phone_no = ?,
+                        address = ?
+                        WHERE readerID = ?";
+        $stmt = mysqli_prepare($conn, $update_query);
+        mysqli_stmt_bind_param($stmt, "ssssi", $fname, $lname, $phone_no, $address, $user_id);
+        
+        if (mysqli_stmt_execute($stmt)) {
+            // Log the activity
+            $description = "Reader profile updated: {$fname} {$lname}";
+            $details = [
+                'reader_id' => $user_id,
+                'old_data' => [
+                    'fname' => $user['fname'],
+                    'lname' => $user['lname'],
+                    'phone_no' => $user['phone_no'],
+                    'address' => $user['address']
+                ],
+                'new_data' => [
+                    'fname' => $fname,
+                    'lname' => $lname,
+                    'phone_no' => $phone_no,
+                    'address' => $address
+                ]
+            ];
+            log_activity('reader_profile_update', $description, 'reader', $_SESSION['email'], $details);
+            
+            mysqli_commit($conn);
+            $_SESSION['success_message'] = "Profile updated successfully!";
+            $_SESSION['name'] = $fname . " " . $lname;
+            header("Location: view_profile.php");
+            exit();
+        } else {
+            throw new Exception("Error updating profile");
+        }
+    } catch (Exception $e) {
+        mysqli_rollback($conn);
         $error_message = "Error updating profile. Please try again.";
+        error_log("Error updating reader profile: " . $e->getMessage());
     }
 }
 ?>

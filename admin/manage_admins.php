@@ -22,6 +22,51 @@ if (isset($_POST['delete']) && isset($_POST['admin_id'])) {
     header("Location: manage_admins.php");
     exit();
 }
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $fname = trim($_POST['fname']);
+    $lname = trim($_POST['lname']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
+    $address = trim($_POST['address']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // Validate input
+    $errors = [];
+    if (empty($fname)) $errors[] = "First name is required.";
+    if (empty($lname)) $errors[] = "Last name is required.";
+    if (empty($email)) $errors[] = "Email is required.";
+    if (empty($phone)) $errors[] = "Phone number is required.";
+    if (strlen($phone) > 10) $errors[] = "Phone number must be at most 10 characters long.";
+    if (empty($address)) $errors[] = "Address is required.";
+    
+    // Only validate password if it's being changed
+    if (!empty($password)) {
+        if ($password !== $confirm_password) $errors[] = "Passwords do not match.";
+        if (strlen($password) < 6) $errors[] = "Password must be at least 6 characters long.";
+    }
+
+    // Check if email already exists (excluding current admin)
+    if (email_exists($email) && $email !== $admin['email']) {
+        $errors[] = "Email already exists.";
+    }
+
+    if (empty($errors)) {
+        // $admin_id, $email, $fname, $lname, $address, $phone_no
+        if (update_admin($admin_id, $email, $fname, $lname, $address, $phone)) {
+            if($password != ""){
+                update_password($admin['loginID'], $password);
+            }
+            $_SESSION['success_message'] = "Admin updated successfully.";
+            header("Location: manage_admins.php");
+            exit();
+        } else {
+            $errors[] = "Error updating admin.";
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,7 +161,7 @@ if (isset($_POST['delete']) && isset($_POST['admin_id'])) {
                                                class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <?php if ($admin['adminID'] != $_SESSION['loginID']): ?>
+                                            <?php if (isset($_SESSION['loginID']) && $admin['adminID'] != $_SESSION['loginID']): ?>
                                                 <form method="POST" action="" class="d-inline" 
                                                       onsubmit="return confirm('Are you sure you want to delete this admin?');">
                                                     <input type="hidden" name="admin_id" value="<?php echo $admin['adminID']; ?>">
