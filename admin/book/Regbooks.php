@@ -1,85 +1,123 @@
 <?php
+require("../functions.php");
 session_start();
-#fetch data from database
-$connection = mysqli_connect("localhost", "root", "");
-$db = mysqli_select_db($connection, "lms");
-$book_name = "";
-$author = "";
-$category = "";
-$book_no = "";
-$price = "";
-$query = "select books.book_name,books.book_no,book_price,authors.author_name from books left join authors on books.author_id = authors.author_id";
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
+    header("Location: ../../index.php");
+    exit();
+}
+
+// Get all books with author details
+$books = get_all_books_with_details();
 ?>
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>All Reg Books</title>
-    <meta charset="utf-8" name="viewport" content="width=device-width,intial-scale=1">
-    <link rel="stylesheet" type="text/css" href="../bootstrap-4.4.1/css/bootstrap.min.css">
-    <script type="text/javascript" src="../bootstrap-4.4.1/js/juqery_latest.js"></script>
-    <script type="text/javascript" src="../bootstrap-4.4.1/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Books - Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="../../css/common.css" rel="stylesheet">
 </head>
-
 <body>
+    <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="admin_dashboard.php">Library Management System (LMS)</a>
-            </div>
-            <font style="color: white"><span><strong>Welcome: <?php echo $_SESSION['name']; ?></strong></span></font>
-            <font style="color: white"><span><strong>Email: <?php echo $_SESSION['email']; ?></strong></font>
-            <ul class="nav navbar-nav navbar-right">
+            <a class="navbar-brand" href="../admin_dashboard.php">
+                <i class="fas fa-book-reader"></i> Library Management System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#">View Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Edit Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="change_password.php">Change Password</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../logout.php">Logout</a>
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['name']); ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="../view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
+                            <li><a class="dropdown-item" href="../edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                            <li><a class="dropdown-item" href="../change_password.php"><i class="fas fa-key"></i> Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
                 </li>
             </ul>
+            </div>
         </div>
-    </nav><br>
-    <center>
-        <h4>Registered Book's Detail</h4><br>
-    </center>
-    <div class="row">
-        <div class="col-md-2"></div>
-        <div class="col-md-8">
-            <form>
-                <table class="table-bordered" width="900px" style="text-align: center">
-                    <tr>
-                        <th>Name</th>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-book"></i> Registered Books</h4>
+                <a href="add_book.php" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Book
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Book Title</th>
                         <th>Author</th>
+                                <th>ISBN</th>
+                                <th>Category</th>
                         <th>Price</th>
-                        <th>Number</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                     </tr>
-
-                    <?php
-                    $query_run = mysqli_query($connection, $query);
-                    while ($row = mysqli_fetch_assoc($query_run)) {
-                        ?>
-                        <tr>
-                            <td><?php echo $row['book_name']; ?></td>
-                            <td><?php echo $row['author_name']; ?></td>
-                            <td><?php echo $row['book_price']; ?></td>
-                            <td><?php echo $row['book_no']; ?></td>
+                        </thead>
+                        <tbody>
+                            <?php while($book = mysqli_fetch_assoc($books)): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($book['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($book['authorName']); ?></td>
+                                    <td><?php echo htmlspecialchars($book['ISBN']); ?></td>
+                                    <td><?php echo htmlspecialchars($book['categoryName']); ?></td>
+                                    <td>$<?php echo number_format($book['price'], 2); ?></td>
+                                    <td>
+                                        <?php if ($book['status'] == 'available'): ?>
+                                            <span class="badge bg-success">Available</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning">Issued</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="edit_book.php?id=<?php echo $book['bookID']; ?>" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="view_book_details.php?id=<?php echo $book['bookID']; ?>" 
+                                               class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <?php if ($book['status'] == 'available'): ?>
+                                                <form method="POST" action="delete_book.php" class="d-inline" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this book?');">
+                                                    <input type="hidden" name="book_id" value="<?php echo $book['bookID']; ?>">
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
                         </tr>
-
-                        <?php
-                    }
-                    ?>
+                            <?php endwhile; ?>
+                        </tbody>
                 </table>
-            </form>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2"></div>
     </div>
-</body>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

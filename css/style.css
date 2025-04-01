@@ -6,6 +6,16 @@
     --background-color: #f5f6fa;
     --text-color: #2c3e50;
     --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --navbar-dark: #1a237e;
+    --navbar-light: #e3f2fd;
+    --text-light: #ffffff;
+    --text-dark: #2c3e50;
+    --border-color: #e0e0e0;
+    --hover-bg: #f8f9fa;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f1c40f;
+    --info-color: #3498db;
 }
 
 body {
@@ -20,18 +30,40 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.navbar-dark {
+    background-color: var(--navbar-dark) !important;
+}
+
+.navbar-light {
+    background-color: var(--navbar-light) !important;
+}
+
 .navbar-brand {
     font-weight: bold;
-    color: var(--primary-color) !important;
+    color: var(--text-light) !important;
+}
+
+.navbar-light .navbar-brand {
+    color: var(--text-dark) !important;
 }
 
 .nav-link {
-    color: var(--text-color) !important;
+    color: var(--text-light) !important;
     transition: color 0.3s ease;
 }
 
+.navbar-light .nav-link {
+    color: var(--text-dark) !important;
+}
+
 .nav-link:hover {
-    color: var(--secondary-color) !important;
+    color: var(--text-light) !important;
+    opacity: 0.9;
+}
+
+.navbar-light .nav-link:hover {
+    color: var(--text-dark) !important;
+    opacity: 0.8;
 }
 
 /* Card Styles */
@@ -41,6 +73,7 @@ body {
     box-shadow: var(--card-shadow);
     transition: transform 0.3s ease;
     margin-bottom: 20px;
+    background-color: #ffffff;
 }
 
 .card:hover {
@@ -49,7 +82,7 @@ body {
 
 .card-header {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--text-light);
     border-radius: 8px 8px 0 0 !important;
     padding: 15px 20px;
 }
@@ -68,11 +101,31 @@ body {
 .btn-primary {
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
+    color: var(--text-light);
 }
 
 .btn-danger {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: var(--text-light);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: var(--text-light);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+    color: var(--text-dark);
+}
+
+.btn-info {
+    background-color: var(--info-color);
+    border-color: var(--info-color);
+    color: var(--text-light);
 }
 
 .btn:hover {
@@ -82,10 +135,15 @@ body {
 
 /* Dashboard Stats */
 .stats-card {
-    background: white;
+    background: #ffffff;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
 }
 
 .stats-number {
@@ -96,26 +154,27 @@ body {
 
 /* Table Styles */
 .table {
-    background: white;
+    background: #ffffff;
     border-radius: 8px;
     overflow: hidden;
 }
 
 .table thead th {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--text-light);
     border: none;
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(52, 152, 219, 0.1);
+    background-color: var(--hover-bg);
 }
 
 /* Form Styles */
 .form-control {
     border-radius: 5px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     padding: 10px;
+    background-color: #ffffff;
 }
 
 .form-control:focus {
@@ -125,7 +184,7 @@ body {
 
 /* Recent Activity Section */
 .recent-activity {
-    background: white;
+    background: #ffffff;
     border-radius: 8px;
     padding: 20px;
     margin-top: 20px;
@@ -133,7 +192,7 @@ body {
 
 .activity-item {
     padding: 10px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .activity-item:last-child {
@@ -142,7 +201,7 @@ body {
 
 /* Search Bar */
 .search-container {
-    background: white;
+    background: #ffffff;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -150,7 +209,7 @@ body {
 
 /* Profile Section */
 .profile-section {
-    background: white;
+    background: #ffffff;
     border-radius: 8px;
     padding: 20px;
     margin-top: 20px;

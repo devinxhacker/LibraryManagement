@@ -1,40 +1,43 @@
 <?php
-require("../functions.php");
+require("functions.php");
 session_start();
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
-    header("Location: ../../index.php");
+    header("Location: ../index.php");
     exit();
 }
 
-// Get admin profile
-$admin_profile = get_admin_profile($_SESSION['email']);
+// Get all admins
+$admins = get_all_admins();
 
-// Get all categories with book counts
-$query = "SELECT c.*, COUNT(b.bookID) as book_count 
-          FROM categories c 
-          LEFT JOIN books b ON c.categoryID = b.categoryID 
-          GROUP BY c.categoryID 
-          ORDER BY c.categoryName";
-$result = mysqli_query($conn, $query);
-$categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
+// Handle admin deletion
+if (isset($_POST['delete']) && isset($_POST['admin_id'])) {
+    $admin_id = $_POST['admin_id'];
+    if (delete_admin($admin_id)) {
+        $_SESSION['success_message'] = "Admin deleted successfully.";
+    } else {
+        $_SESSION['error_message'] = "Error deleting admin.";
+    }
+    header("Location: manage_admins.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Categories - Library Management System</title>
+    <title>Manage Admins - Library Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="../../css/common.css" rel="stylesheet">
+    <link href="../css/common.css" rel="stylesheet">
 </head>
 <body>
     <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="../admin_dashboard.php">
+            <a class="navbar-brand" href="admin_dashboard.php">
                 <i class="fas fa-book-reader"></i> Library Management System
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -44,14 +47,14 @@ $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($admin_profile['fname'] . ' ' . $admin_profile['lname']); ?>
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['name']); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="../view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
-                            <li><a class="dropdown-item" href="../edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
-                            <li><a class="dropdown-item" href="../change_password.php"><i class="fas fa-key"></i> Change Password</a></li>
+                            <li><a class="dropdown-item" href="view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
+                            <li><a class="dropdown-item" href="edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                            <li><a class="dropdown-item" href="change_password.php"><i class="fas fa-key"></i> Change Password</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="../../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            <li><a class="dropdown-item" href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -60,7 +63,7 @@ $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
     </nav>
 
     <!-- Main Content -->
-    <div class="container mt-4">
+    <div class="container-fluid mt-4">
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php 
@@ -83,9 +86,9 @@ $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="fas fa-tags"></i> Manage Categories</h4>
-                <a href="add_cat.php" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add New Category
+                <h4 class="mb-0"><i class="fas fa-user-shield"></i> Manage Admins</h4>
+                <a href="add_admin.php" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Admin
                 </a>
             </div>
             <div class="card-body">
@@ -93,42 +96,39 @@ $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>Category Name</th>
-                                <th>Books Count</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Address</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach($categories as $category): ?>
+                            <?php while($admin = mysqli_fetch_assoc($admins)): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($category['categoryName']); ?></td>
-                                    <td>
-                                        <span class="badge bg-info">
-                                            <?php echo $category['book_count']; ?> books
-                                        </span>
-                                    </td>
+                                    <td><?php echo htmlspecialchars($admin['fname'] . ' ' . $admin['lname']); ?></td>
+                                    <td><?php echo htmlspecialchars($admin['email']); ?></td>
+                                    <td><?php echo htmlspecialchars($admin['phone_no']); ?></td>
+                                    <td><?php echo htmlspecialchars($admin['address']); ?></td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="view_category_books.php?id=<?php echo $category['categoryID']; ?>" 
-                                               class="btn btn-sm btn-info" title="View Books">
-                                                <i class="fas fa-book"></i>
-                                            </a>
-                                            <a href="edit_cat.php?cid=<?php echo $category['categoryID']; ?>" 
-                                               class="btn btn-sm btn-primary" title="Edit">
+                                            <a href="edit_admin.php?id=<?php echo $admin['adminID']; ?>" 
+                                               class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <?php if ($category['book_count'] == 0): ?>
-                                                <a href="delete_cat.php?cid=<?php echo $category['categoryID']; ?>" 
-                                                   class="btn btn-sm btn-danger" 
-                                                   onclick="return confirm('Are you sure you want to delete this category?');"
-                                                   title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
+                                            <?php if ($admin['adminID'] != $_SESSION['loginID']): ?>
+                                                <form method="POST" action="" class="d-inline" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this admin?');">
+                                                    <input type="hidden" name="admin_id" value="<?php echo $admin['adminID']; ?>">
+                                                    <button type="submit" name="delete" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
                                             <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php endwhile; ?>
                         </tbody>
                     </table>
                 </div>

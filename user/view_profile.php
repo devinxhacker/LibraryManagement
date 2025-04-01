@@ -59,21 +59,21 @@ $total_fines = mysqli_fetch_assoc($fines_result)['total'] ?? 0;
                     <span class="email-text">
                         <i class="fas fa-envelope"></i> <?php echo $_SESSION['email']; ?>
                     </span>
-                </div>
+            </div>
                 <ul class="nav navbar-nav">
-                    <li class="nav-item dropdown">
+                <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown">
                             <i class="fas fa-user-cog"></i> My Profile
                         </a>
-                        <div class="dropdown-menu">
+                    <div class="dropdown-menu">
                             <a class="dropdown-item active" href="view_profile.php">
                                 <i class="fas fa-eye"></i> View Profile
                             </a>
-                            <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="edit_profile.php">
                                 <i class="fas fa-edit"></i> Edit Profile
                             </a>
-                            <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="change_password.php">
                                 <i class="fas fa-key"></i> Change Password
                             </a>
@@ -86,7 +86,7 @@ $total_fines = mysqli_fetch_assoc($fines_result)['total'] ?? 0;
                     </li>
                 </ul>
             </div>
-        </div>
+                    </div>
     </nav>
 
     <!-- Main Navigation -->
@@ -114,9 +114,9 @@ $total_fines = mysqli_fetch_assoc($fines_result)['total'] ?? 0;
 
     <!-- Main Content -->
     <div class="container-fluid mt-4">
-        <div class="row">
+    <div class="row">
             <!-- Profile Information -->
-            <div class="col-md-4">
+        <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <i class="fas fa-user"></i> Profile Information
@@ -220,9 +220,9 @@ $total_fines = mysqli_fetch_assoc($fines_result)['total'] ?? 0;
                                 </tbody>
                             </table>
                         </div>
-                    </div>
                 </div>
-            </div>
+                </div>
+                </div>
         </div>
     </div>
 </body>

@@ -1,125 +1,111 @@
 <?php
-require("functions.php");
+require("../functions.php");
 session_start();
-#fetch data from database
-$connection = mysqli_connect("localhost", "root", "");
-$db = mysqli_select_db($connection, "lms");
-$name = "";
-$email = "";
-$mobile = "";
-$query = "select * from admins where email = '$_SESSION[email]'";
-$query_run = mysqli_query($connection, $query);
-while ($row = mysqli_fetch_assoc($query_run)) {
-    $name = $row['name'];
-    $email = $row['email'];
-    $mobile = $row['mobile'];
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
+    header("Location: ../../index.php");
+    exit();
+}
+
+// Get admin profile
+$admin_profile = get_admin_profile($_SESSION['email']);
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_cat'])) {
+    $category_name = trim($_POST['cat_name']);
+    
+    if (empty($category_name)) {
+        $_SESSION['error_message'] = "Category name cannot be empty.";
+    } else {
+        if (add_category($category_name)) {
+            $_SESSION['success_message'] = "Category added successfully.";
+            header("Location: manage_cat.php");
+            exit();
+        } else {
+            $_SESSION['error_message'] = "Error adding category. Please try again.";
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Add New Category</title>
-    <meta charset="utf-8" name="viewport" content="width=device-width,intial-scale=1">
-    <link rel="stylesheet" type="text/css" href="../bootstrap-4.4.1/css/bootstrap.min.css">
-    <script type="text/javascript" src="../bootstrap-4.4.1/js/juqery_latest.js"></script>
-    <script type="text/javascript" src="../bootstrap-4.4.1/js/bootstrap.min.js"></script>
-    <script type="text/javascript">
-        function alertMsg() {
-            alert(Book added successfully...);
-            window.location.href = "admin_dashboard.php";
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Category - Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="../../css/common.css" rel="stylesheet">
 </head>
-
 <body>
+    <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="admin_dashboard.php">Library Management System (LMS)</a>
+            <a class="navbar-brand" href="../admin_dashboard.php">
+                <i class="fas fa-book-reader"></i> Library Management System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($admin_profile['fname'] . ' ' . $admin_profile['lname']); ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="../view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
+                            <li><a class="dropdown-item" href="../edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                            <li><a class="dropdown-item" href="../change_password.php"><i class="fas fa-key"></i> Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
-            <font style="color: white"><span><strong>Welcome: <?php echo $_SESSION['name']; ?></strong></span></font>
-            <font style="color: white"><span><strong>Email: <?php echo $_SESSION['email']; ?></strong></font>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="">View Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Edit Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="change_password.php">Change Password</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../logout.php">Logout</a>
-                </li>
-            </ul>
         </div>
-    </nav><br>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd">
-        <div class="container-fluid">
+    </nav>
 
-            <ul class="nav navbar-nav navbar-center">
-                <li class="nav-item">
-                    <a class="nav-link" href="admin_dashboard.php">Dashboard</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Books </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_book.php">Add New Book</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_book.php">Manage Books</a>
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-tags"></i> Add New Category</h4>
                     </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Category </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_cat.php">Add New Category</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_cat.php">Manage Category</a>
+                    <div class="card-body">
+                        <?php if (isset($_SESSION['error_message'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <?php 
+                                echo $_SESSION['error_message'];
+                                unset($_SESSION['error_message']);
+                                ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <form action="" method="post">
+                            <div class="mb-3">
+                                <label for="cat_name" class="form-label">Category Name</label>
+                                <input type="text" class="form-control" id="cat_name" name="cat_name" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" name="add_cat" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Add Category
+                                </button>
+                                <a href="manage_cat.php" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to List
+                                </a>
+                            </div>
+                        </form>
                     </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Authors</a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_author.php">Add New Author</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_author.php">Manage Author</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="issue_book.php">Issue Book</a>
-                </li>
-            </ul>
-        </div>
-    </nav><br>
-    <center>
-        <h4>Add a new Category</h4><br>
-    </center>
-    <div class="row">
-        <div class="col-md-4"></div>
-        <div class="col-md-4">
-            <form action="" method="post">
-                <div class="form-group">
-                    <label for="name">Category Name:</label>
-                    <input type="text" class="form-control" name="cat_name" required>
                 </div>
-                <button type="submit" name="add_cat" class="btn btn-primary">Add Catogry</button>
-            </form>
+            </div>
         </div>
-        <div class="col-md-4"></div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
-
-<?php
-if (isset($_POST['add_cat'])) {
-    $connection = mysqli_connect("localhost", "root", "");
-    $db = mysqli_select_db($connection, "lms");
-    $query = "insert into category values('','$_POST[cat_name]')";
-    $query_run = mysqli_query($connection, $query);
-    header("Location:admin_dashboard.php");
-}
-?>

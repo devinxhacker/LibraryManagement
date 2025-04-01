@@ -1,130 +1,135 @@
 <?php
 require("functions.php");
 session_start();
-if (!isset($_SESSION["email"])) {
-    header("Location:../index.php");
-} else if ($_SESSION["who"] != "admin") {
-    header("Location:../index.php");
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
+    header("Location: ../index.php");
+    exit();
 }
-#fetch data from database
-$connection = mysqli_connect("localhost", "root", "28092008");
-$db = mysqli_select_db($connection, "lms");
-$name = "";
-$email = "";
-$mobile = "";
-$query = "select * from admins where email = '$_SESSION[email]'";
-$query_run = mysqli_query($connection, $query);
-while ($row = mysqli_fetch_assoc($query_run)) {
-    $name = $row['name'];
-    $email = $row['email'];
-    $mobile = $row['mobile'];
+
+// Get admin profile
+$admin = get_admin_profile($_SESSION['email']);
+
+// Process form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+    $name = $_POST['name'];
+    $mobile = $_POST['mobile'];
+    
+    // Validate input
+    if (empty($name) || empty($mobile)) {
+        $_SESSION['error_message'] = "All fields are required.";
+    } else {
+        // Update profile
+        if (update_admin_profile($_SESSION['email'], $name, $mobile)) {
+            $_SESSION['success_message'] = "Profile updated successfully.";
+            // Refresh admin data
+            $admin = get_admin_profile($_SESSION['email']);
+        } else {
+            $_SESSION['error_message'] = "Error updating profile.";
+        }
+    }
+    
+    header("Location: edit_profile.php");
+    exit();
 }
 ?>
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Dashboard</title>
-    <meta charset="utf-8" name="viewport" content="width=device-width,intial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="../css/common.css" rel="stylesheet">
 </head>
-
 <body>
+    <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="../index.php">Library Management System (LMS)</a>
+            <a class="navbar-brand" href="admin_dashboard.php">
+                <i class="fas fa-book-reader"></i> Library Management System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($admin['name']); ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="view_profile.php"><i class="fas fa-id-card"></i> View Profile</a></li>
+                            <li><a class="dropdown-item" href="edit_profile.php"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                            <li><a class="dropdown-item" href="change_password.php"><i class="fas fa-key"></i> Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
-            <div style="position: fixed; top: 20px; left: 50%;">
-                <font style="color:blue; margin-top: 10px;"><span><strong>Welcome:
-                            <?php echo $_SESSION['name']; ?></strong></span>
-                </font>
-                <font style="color:blue; margin-top: 10px;"><span><strong>Email:
-                            <?php echo $_SESSION['email']; ?></strong></font>
-            </div>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="">View Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Edit Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="change_password.php">Change Password</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../logout.php">Logout</a>
-                </li>
-            </ul>
         </div>
-    </nav><br>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd">
-        <div class="container-fluid">
+    </nav>
 
-            <ul class="nav navbar-nav navbar-center">
-                <li class="nav-item">
-                    <a class="nav-link" href="admin_dashboard.php">Dashboard</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Books </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_book.php">Add New Book</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_book.php">Manage Books</a>
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-user-edit"></i> Edit Profile</h4>
                     </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Category </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_cat.php">Add New Category</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_cat.php">Manage Category</a>
+                    <div class="card-body">
+                        <?php if (isset($_SESSION['success_message'])): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <?php 
+                                echo $_SESSION['success_message'];
+                                unset($_SESSION['success_message']);
+                                ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (isset($_SESSION['error_message'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <?php 
+                                echo $_SESSION['error_message'];
+                                unset($_SESSION['error_message']);
+                                ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <form method="POST" action="">
+                            <div class="mb-3">
+                                <label for="email" class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                                <input type="email" class="form-control" id="email" value="<?php echo htmlspecialchars($admin['email']); ?>" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="name" class="form-label"><i class="fas fa-user"></i> Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($admin['name']); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mobile" class="form-label"><i class="fas fa-phone"></i> Mobile Number</label>
+                                <input type="tel" class="form-control" id="mobile" name="mobile" value="<?php echo htmlspecialchars($admin['mobile']); ?>" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" name="update" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Update Profile
+                                </button>
+                                <a href="view_profile.php" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
                     </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Authors</a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="add_author.php">Add New Author</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="manage_author.php">Manage Author</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="issue_book.php">Issue Book</a>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
-    </nav><br>
-    <span>
-        <marquee>This is library mangement system. Library opens at 8:00 AM and close at 8:00 PM</marquee>
-    </span><br><br>
-    <center>
-        <h4>Admin Profile Detail</h4><br>
-    </center>
-    <div class="row">
-        <div class="col-md-4"></div>
-        <div class="col-md-4">
-            <form action="update.php" method="post">
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" class="form-control" name="name" value="<?php echo $name; ?>">
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="text" name="email" class="form-control" value="<?php echo $email; ?>">
-                </div>
-                <div class="form-group">
-                    <label for="mobile">Mobile:</label>
-                    <input type="text" name="mobile" class="form-control" value="<?php echo $mobile; ?>">
-                </div>
-                <button type="submit" name="update" class="btn btn-primary">Update</button>
-            </form>
-        </div>
-        <div class="col-md-4"></div>
     </div>
-</body>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

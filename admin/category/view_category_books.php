@@ -8,24 +8,49 @@ if (!isset($_SESSION["email"]) || $_SESSION["who"] != "admin") {
     exit();
 }
 
+// Check if category ID is provided
+if (!isset($_GET['id'])) {
+    $_SESSION['error_message'] = "Category ID not provided.";
+    header("Location: manage_cat.php");
+    exit();
+}
+
+$category_id = $_GET['id'];
+
+// Get category details
+$category = get_category_by_id($category_id);
+if (!$category) {
+    $_SESSION['error_message'] = "Category not found.";
+    header("Location: manage_cat.php");
+    exit();
+}
+
 // Get admin profile
 $admin_profile = get_admin_profile($_SESSION['email']);
 
-// Get all categories with book counts
-$query = "SELECT c.*, COUNT(b.bookID) as book_count 
-          FROM categories c 
-          LEFT JOIN books b ON c.categoryID = b.categoryID 
-          GROUP BY c.categoryID 
-          ORDER BY c.categoryName";
-$result = mysqli_query($conn, $query);
-$categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
+// Get books in this category with additional details
+$query = "SELECT b.*, a.authorName, p.publisherName, 
+          CASE WHEN ib.bookID IS NOT NULL THEN 1 ELSE 0 END as is_issued,
+          ib.issuedate, ib.duedate, r.fname as reader_fname, r.lname as reader_lname
+          FROM books b
+          LEFT JOIN authors a ON b.authorID = a.authorID
+          LEFT JOIN publishers p ON b.publisherID = p.publisherID
+          LEFT JOIN issued_books ib ON b.bookID = ib.bookID
+          LEFT JOIN readers r ON ib.readerID = r.readerID
+          WHERE b.categoryID = ?
+          ORDER BY b.title";
+$stmt = mysqli_prepare($conn, $query);
+mysqli_stmt_bind_param($stmt, "i", $category_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$books = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Categories - Library Management System</title>
+    <title>Books in <?php echo htmlspecialchars($category['categoryName']); ?> - Library Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="../../css/common.css" rel="stylesheet">
@@ -61,68 +86,57 @@ $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
     <!-- Main Content -->
     <div class="container mt-4">
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?php 
-                echo $_SESSION['success_message'];
-                unset($_SESSION['success_message']);
-                ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php 
-                echo $_SESSION['error_message'];
-                unset($_SESSION['error_message']);
-                ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4><i class="fas fa-books"></i> Books in <?php echo htmlspecialchars($category['categoryName']); ?></h4>
+            <a href="manage_cat.php" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Categories
+            </a>
+        </div>
 
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="fas fa-tags"></i> Manage Categories</h4>
-                <a href="add_cat.php" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add New Category
-                </a>
-            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>Category Name</th>
-                                <th>Books Count</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Publisher</th>
+                                <th>ISBN</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach($categories as $category): ?>
+                            <?php foreach($books as $book): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($category['categoryName']); ?></td>
+                                    <td><?php echo htmlspecialchars($book['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($book['authorName']); ?></td>
+                                    <td><?php echo htmlspecialchars($book['publisherName']); ?></td>
+                                    <td><?php echo htmlspecialchars($book['ISBN']); ?></td>
                                     <td>
-                                        <span class="badge bg-info">
-                                            <?php echo $category['book_count']; ?> books
-                                        </span>
+                                        <?php if ($book['is_issued']): ?>
+                                            <span class="badge bg-warning">
+                                                Issued to <?php echo htmlspecialchars($book['reader_fname'] . ' ' . $book['reader_lname']); ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-success">Available</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="view_category_books.php?id=<?php echo $category['categoryID']; ?>" 
-                                               class="btn btn-sm btn-info" title="View Books">
-                                                <i class="fas fa-book"></i>
+                                            <a href="../book/view_book_details.php?id=<?php echo $book['bookID']; ?>" 
+                                               class="btn btn-sm btn-info" title="View Details">
+                                                <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="edit_cat.php?cid=<?php echo $category['categoryID']; ?>" 
+                                            <a href="../book/edit_book.php?id=<?php echo $book['bookID']; ?>" 
                                                class="btn btn-sm btn-primary" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <?php if ($category['book_count'] == 0): ?>
-                                                <a href="delete_cat.php?cid=<?php echo $category['categoryID']; ?>" 
-                                                   class="btn btn-sm btn-danger" 
-                                                   onclick="return confirm('Are you sure you want to delete this category?');"
-                                                   title="Delete">
-                                                    <i class="fas fa-trash"></i>
+                                            <?php if (!$book['is_issued']): ?>
+                                                <a href="../book/issue_book.php?id=<?php echo $book['bookID']; ?>" 
+                                                   class="btn btn-sm btn-success" title="Issue Book">
+                                                    <i class="fas fa-book-reader"></i>
                                                 </a>
                                             <?php endif; ?>
                                         </div>
@@ -138,4 +152,4 @@ $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html> 

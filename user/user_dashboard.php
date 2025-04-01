@@ -63,21 +63,21 @@ $recent_activities = mysqli_query($conn, $recent_activities_query);
                     <span class="email-text">
                         <i class="fas fa-envelope"></i> <?php echo $_SESSION['email']; ?>
                     </span>
-                </div>
+            </div>
                 <ul class="nav navbar-nav">
-                    <li class="nav-item dropdown">
+                <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown">
                             <i class="fas fa-user-cog"></i> My Profile
                         </a>
-                        <div class="dropdown-menu">
+                    <div class="dropdown-menu">
                             <a class="dropdown-item" href="view_profile.php">
                                 <i class="fas fa-eye"></i> View Profile
                             </a>
-                            <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="edit_profile.php">
                                 <i class="fas fa-edit"></i> Edit Profile
                             </a>
-                            <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="change_password.php">
                                 <i class="fas fa-key"></i> Change Password
                             </a>
@@ -90,7 +90,7 @@ $recent_activities = mysqli_query($conn, $recent_activities_query);
                     </li>
                 </ul>
             </div>
-        </div>
+                    </div>
     </nav>
 
     <!-- Main Navigation -->
@@ -119,7 +119,7 @@ $recent_activities = mysqli_query($conn, $recent_activities_query);
     <!-- Main Content -->
     <div class="container-fluid mt-4">
         <!-- Search Section -->
-        <div class="row">
+    <div class="row">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
@@ -216,7 +216,7 @@ $recent_activities = mysqli_query($conn, $recent_activities_query);
                     <div class="card-header">
                         <i class="fas fa-bolt"></i> Quick Actions
                     </div>
-                    <div class="card-body">
+                <div class="card-body">
                         <div class="row">
                             <div class="col-md-3">
                                 <a href="browse_books.php" class="btn btn-primary btn-block">
