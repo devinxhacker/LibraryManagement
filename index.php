@@ -1,13 +1,53 @@
 <?php
 session_start();
+
+// Process login
+if (isset($_POST['login'])) {
+    $connection = mysqli_connect("localhost", "root", "28092008");
+    $db = mysqli_select_db($connection, "lms");
+    $query = "select * from readers where email = '$_POST[email]'";
+    $query_run = mysqli_query($connection, $query);
+    while ($row = mysqli_fetch_assoc($query_run)) {
+        if ($row['email'] == $_POST['email']) {
+            $loginID = $row['loginID'];
+            $query2 = "select * from auth where loginID = '$loginID'";
+            $query_run2 = mysqli_query($connection, $query2);
+            $row2 = mysqli_fetch_assoc($query_run2);
+            if ($row2['password'] == $_POST['password']) {
+                $_SESSION['fname'] = $row['fname'];
+                $_SESSION['lname'] = $row['lname'];
+                $_SESSION['name'] = $row['fname'] . " " . $row['lname'];
+                $_SESSION['email'] = $row['email'];
+                $_SESSION['id'] = $row['readerID'];
+                $_SESSION['who'] = "reader";
+                echo "<script>localStorage.setItem('userID', '{$_SESSION['id']}');</script>";
+                header("Location: user/user_dashboard.php");
+                exit();
+            } else {
+                $login_error = '<div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i> Wrong Password!
+                              </div>';
+            }
+        }
+    }
+}
+
+// Process logout
+if (isset($_POST['logout'])) {
+    session_destroy();
+    echo "<script>localStorage.removeItem('userID'); window.location.href = 'index.php';</script>";
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
     <title>Library Management System</title>
-    <meta charset="utf-8" name="viewport" content="width=device-width,intial-scale=1">
+    <meta charset="utf-8" name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
@@ -32,71 +72,104 @@ session_start();
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="index.php">Library Management System</a>
+                <a class="navbar-brand" href="index.php">
+                    <i class="fas fa-book-reader"></i> Library Management System
+                </a>
             </div>
             <?php if (!isset($_SESSION['name'])): ?>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php">User Login</a>
+                        <a class="nav-link" href="index.php">
+                            <i class="fas fa-user"></i> User Login
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="admin_login.php">Admin Login</a>
+                        <a class="nav-link" href="admin_login.php">
+                            <i class="fas fa-user-shield"></i> Admin Login
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="signup.php"></span>Signup</a>
+                        <a class="nav-link" href="signup.php">
+                            <i class="fas fa-user-plus"></i> Signup
+                        </a>
                     </li>
                 </ul>
-                
             <?php elseif ($_SESSION['who'] == "admin"): ?>
-                <div style="position: fixed; top: 20px; left: 50%;">
-                    <font style="color:blue; margin-top: 10px;"><span><strong>Welcome:
-                                <?php echo $_SESSION['name']; ?></strong></span>
-                    </font>
-                    <font style="color:blue; margin-top: 10px;"><span><strong>Email:
-                                <?php echo $_SESSION['email']; ?></strong></font>
+                <div class="user-info">
+                    <span class="welcome-text">
+                        <i class="fas fa-user-circle"></i> Welcome: <?php echo $_SESSION['name']; ?>
+                    </span>
+                    <span class="email-text">
+                        <i class="fas fa-envelope"></i> <?php echo $_SESSION['email']; ?>
+                    </span>
                 </div>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="nav-item">
-                        <a class="nav-link" href="admin/admin_dashboard.php">Dashboard</a>
+                        <a class="nav-link" href="admin/admin_dashboard.php">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                            <i class="fas fa-user-cog"></i> My Profile
+                        </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="admin/view_profile.php">View Profile</a>
+                            <a class="dropdown-item" href="admin/view_profile.php">
+                                <i class="fas fa-eye"></i> View Profile
+                            </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="admin/edit_profile.php">Edit Profile</a>
+                            <a class="dropdown-item" href="admin/edit_profile.php">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="admin/change_password.php">Change Password</a>
+                            <a class="dropdown-item" href="admin/change_password.php">
+                                <i class="fas fa-key"></i> Change Password
+                            </a>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../logout.php">Logout</a>
+                        <a class="nav-link" href="logout.php">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
                     </li>
                 </ul>
             <?php else: ?>
-                <div style="position: fixed; top: 20px; left: 50%;">
-                    <font style="color:blue; margin-top: 10px;"><span><strong>Welcome:
-                                <?php echo $_SESSION['name']; ?></strong></span>
-                    </font>
-                    <font style="color:blue; margin-top: 10px;"><span><strong>Email:
-                                <?php echo $_SESSION['email']; ?></strong></font>
+                <div class="user-info">
+                    <span class="welcome-text">
+                        <i class="fas fa-user-circle"></i> Welcome: <?php echo $_SESSION['name']; ?>
+                    </span>
+                    <span class="email-text">
+                        <i class="fas fa-envelope"></i> <?php echo $_SESSION['email']; ?>
+                    </span>
                 </div>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="nav-item">
-                        <a class="nav-link" href="user/user_dashboard.php">Dashboard</a>
+                        <a class="nav-link" href="user/user_dashboard.php">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-toggle="dropdown">My Profile </a>
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                            <i class="fas fa-user-cog"></i> My Profile
+                        </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="user/view_profile.php">View Profile</a>
+                            <a class="dropdown-item" href="user/view_profile.php">
+                                <i class="fas fa-eye"></i> View Profile
+                            </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="user/edit_profile.php">Edit Profile</a>
+                            <a class="dropdown-item" href="user/edit_profile.php">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="user/change_password.php">Change Password</a>
+                            <a class="dropdown-item" href="user/change_password.php">
+                                <i class="fas fa-key"></i> Change Password
+                            </a>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../logout.php">Logout</a>
+                        <a class="nav-link" href="logout.php">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
                     </li>
                 </ul>
             <?php endif; ?>
@@ -105,7 +178,7 @@ session_start();
     <div class="row">
         <div class="col-md-4" id="side_bar">
             <h5>Today's Quote</h5>
-            <h6>“There is more treasure in books than in all the pirate's loot on Treasure Island"</h6>
+            <h6>"There is more treasure in books than in all the pirate's loot on Treasure Island"</h6>
             <p>~ Walt Disney</p>
             <h5>Library Timing</h5>
             <ul>
@@ -125,74 +198,53 @@ session_start();
             <div id="login-section">
                 <?php if (!isset($_SESSION['email'])): ?>
                     <center>
-                        <h3>User Login Form</h3>
+                        <h3><i class="fas fa-user-circle"></i> User Login Form</h3>
                     </center>
+                    <?php if (isset($login_error)) echo $login_error; ?>
                     <form action="" method="post">
                         <div class="form-group">
-                            <label for="email">Email ID:</label>
+                            <label for="email"><i class="fas fa-envelope"></i> Email ID:</label>
                             <input type="text" name="email" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="password">Password:</label>
+                            <label for="password"><i class="fas fa-key"></i> Password:</label>
                             <input type="password" name="password" class="form-control" required>
                         </div>
-                        <button type="submit" name="login" class="btn btn-primary">Login</button> |
-                        <a href="signup.php"> Signup now !!</a>
-
+                        <button type="submit" name="login" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <a href="signup.php" class="btn btn-success">
+                            <i class="fas fa-user-plus"></i> Signup now
+                        </a>
                     </form>
                 <?php elseif ($_SESSION['who'] == 'admin'): ?>
                     <center>
-                        <h3>ADMIN</h3>
+                        <h3><i class="fas fa-user-shield"></i> ADMIN</h3>
                     </center>
-                    <p>Welcome, Admin <?php echo $_SESSION['name']; ?>!</p>
-                    <p>Email: <?php echo $_SESSION['email']; ?></p>
-                    <form action="" method="post">
-                        <button type="submit" name="logout" class="btn btn-danger">Logout</button>
-                    </form>
+                    <div class="profile-section">
+                        <p><i class="fas fa-user-circle"></i> Welcome, Admin <?php echo $_SESSION['name']; ?>!</p>
+                        <p><i class="fas fa-envelope"></i> Email: <?php echo $_SESSION['email']; ?></p>
+                        <form action="" method="post">
+                            <button type="submit" name="logout" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </div>
                 <?php else: ?>
                     <center>
-                        <h3>USER</h3>
+                        <h3><i class="fas fa-user"></i> USER</h3>
                     </center>
-                    <p>Welcome, <?php echo $_SESSION['name']; ?>!</p>
-                    <p>Email: <?php echo $_SESSION['email']; ?></p>
-                    <form action="" method="post">
-                        <button type="submit" name="logout" class="btn btn-danger">Logout</button>
-                    </form>
+                    <div class="profile-section">
+                        <p><i class="fas fa-user-circle"></i> Welcome, <?php echo $_SESSION['name']; ?>!</p>
+                        <p><i class="fas fa-envelope"></i> Email: <?php echo $_SESSION['email']; ?></p>
+                        <form action="" method="post">
+                            <button type="submit" name="logout" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </div>
                 <?php endif; ?>
             </div>
-            <?php
-            if (isset($_POST['login'])) {
-                $connection = mysqli_connect("localhost", "root", "28092008");
-                $db = mysqli_select_db($connection, "lms");
-                $query = "select * from readers where email = '$_POST[email]'";
-                $query_run = mysqli_query($connection, $query);
-                while ($row = mysqli_fetch_assoc($query_run)) {
-                    if ($row['email'] == $_POST['email']) {
-                        $loginID = $row['loginID'];
-                        $query2 = "select * from auth where loginID = '$loginID'";
-                        $query_run2 = mysqli_query($connection, $query2);
-                        $row2 = mysqli_fetch_assoc($query_run2);
-                        if ($row2['password'] == $_POST['password']) {
-                            $_SESSION['fname'] = $row['fname'];
-                            $_SESSION['lname'] = $row['lname'];
-                            $_SESSION['name'] = $row['fname'] . " " . $row['lname'];
-                            $_SESSION['email'] = $row['email'];
-                            $_SESSION['id'] = $row['readerID'];
-                            $_SESSION['who'] = "reader";
-                            echo "<script>localStorage.setItem('userID', '{$_SESSION['id']}');</script>";
-                            header("Location: user/user_dashboard.php");
-                        } else {
-                            echo '<br><br><center><span class="alert-danger">Wrong Password !!</span></center>';
-                        }
-                    }
-                }
-            }
-
-            if (isset($_POST['logout'])) {
-                session_destroy();
-                echo "<script>localStorage.removeItem('userID'); window.location.href = 'index.php';</script>";
-            }
-            ?>
         </div>
     </div>
 </body>

@@ -1,6 +1,10 @@
 <?php
 session_start();
+if (isset($_SESSION['who']) && $_SESSION['who'] == "admin") {
+    echo "<script>localStorage.removeItem('adminID');</script>";
+} else {
+    echo "<script>localStorage.removeItem('userID');</script>";
+}
 session_destroy();
-echo "<script>localStorage.removeItem('userID'); localStorage.removeItem('adminID'); window.location.href = 'index.php';</script>";
 header("Location: index.php");
 ?>

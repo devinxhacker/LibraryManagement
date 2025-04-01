@@ -1,130 +1,98 @@
 <?php
 session_start();
+
+// Process login
+if (isset($_POST['login'])) {
+    $connection = mysqli_connect("localhost", "root", "28092008");
+    $db = mysqli_select_db($connection, "lms");
+    $query = "select * from admins where email = '$_POST[email]'";
+    $query_run = mysqli_query($connection, $query);
+    while ($row = mysqli_fetch_assoc($query_run)) {
+        if ($row['email'] == $_POST['email']) {
+            $loginID = $row['loginID'];
+            $query2 = "select * from auth where loginID = '$loginID'";
+            $query_run2 = mysqli_query($connection, $query2);
+            $row2 = mysqli_fetch_assoc($query_run2);
+            if ($row2['password'] == $_POST['password']) {
+                $_SESSION['fname'] = $row['fname'];
+                $_SESSION['lname'] = $row['lname'];
+                $_SESSION['name'] = $row['fname'] . " " . $row['lname'];
+                $_SESSION['email'] = $row['email'];
+                $_SESSION['id'] = $row['adminID'];
+                $_SESSION['who'] = "admin";
+                echo "<script>localStorage.setItem('adminID', '{$_SESSION['id']}');</script>";
+                header("Location: admin/admin_dashboard.php");
+                exit();
+            } else {
+                $login_error = '<div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i> Wrong Password!
+                              </div>';
+            }
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>LMS | Login</title>
-    <meta charset="utf-8" name="viewport" content="width=device-width,intial-scale=1">
+    <title>Admin Login - Library Management System</title>
+    <meta charset="utf-8" name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
-<style type="text/css">
-    #main_content {
-        background: rgba(245, 245, 245, 0.9);
-        padding: 50px;
-    }
-
-    #side_bar {
-        background: rgba(245, 245, 245, 0.9);
-        padding: 50px;
-    }
-
-    body {
-        background: rgba(245, 245, 245, 0.4);
-        /* background-image: url("https://img.freepik.com/free-photo/abundant-collection-antique-books-wooden-shelves-generated-by-ai_188544-29660.jpg?size=626&amp;ext=jpg&amp;ga=GA1.1.1546980028.1704240000&amp;semt=sph"); */
-    }
-</style>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="index.php">Library Management System</a>
+                <a class="navbar-brand" href="index.php">
+                    <i class="fas fa-book-reader"></i> Library Management System
+                </a>
             </div>
             <ul class="nav navbar-nav navbar-right">
                 <li class="nav-item">
-                    <a class="nav-link" href="./index.php">User Login</a>
+                    <a class="nav-link" href="index.php">
+                        <i class="fas fa-home"></i> Home
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="./admin_login.php">Admin Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="./signup.php"></span>Signup</a>
+                    <a class="nav-link" href="index.php">
+                        <i class="fas fa-user"></i> User Login
+                    </a>
                 </li>
             </ul>
         </div>
     </nav>
-    <div class="row">
-        <div class="col-md-4" id="side_bar">
-            <h5>Today's Quote</h5>
-            <h6>“There is more treasure in books than in all the pirate's loot on Treasure Island"</h6>
-            <p>~ Walt Disney</p>
-            <h5>Library Timing</h5>
-            <ul>
-                <li>Opening: 9:00 AM</li>
-                <li>Closing: 12:00 PM</li>
-            </ul>
-            <h5>What We provide ?</h5>
-            <ul>
-                <li>AC Rooms</li>
-                <li>Free Wi-fi</li>
-                <li>Learning Environment</li>
-                <li>Discussion Room</li>
-                <li>Free Electricity</li>
-            </ul>
-        </div>
-        <div class="col-md-8" id="main_content">
-            <center>
-                <h3><u>Admin Login Form</u></h3>
-            </center>
-            <div id="login-section">
-                <?php if (!isset($_SESSION['id'])): ?>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <div class="login-container">
+                    <center>
+                        <h3><i class="fas fa-user-shield"></i> Admin Login</h3>
+                    </center>
+                    <?php if (isset($login_error)) echo $login_error; ?>
                     <form action="" method="post">
                         <div class="form-group">
-                            <label for="email">Email ID:</label>
+                            <label for="email"><i class="fas fa-envelope"></i> Email ID:</label>
                             <input type="text" name="email" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="password">Password:</label>
+                            <label for="password"><i class="fas fa-key"></i> Password:</label>
                             <input type="password" name="password" class="form-control" required>
                         </div>
-                        <button type="submit" name="login" class="btn btn-primary">Admin Login</button>
-                        <!-- <a href="signup.php"> Signup now !!</a> -->
+                        <button type="submit" name="login" class="btn btn-primary btn-block">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
                     </form>
-                <?php else: ?>
-                    <p>Welcome, Admin <?php echo $_SESSION['name']; ?>!</p>
-                    <p>Email: <?php echo $_SESSION['email']; ?></p>
-                    <form action="" method="post">
-                        <button type="submit" name="logout" class="btn btn-danger">Logout</button>
-                    </form>
-                <?php endif; ?>
+                </div>
             </div>
-            <?php
-            if (isset($_POST['login'])) {
-                $connection = mysqli_connect("localhost", "root", "28092008");
-                $db = mysqli_select_db($connection, "lms");
-                $query = "select * from admins where email = '$_POST[email]'";
-                $query_run = mysqli_query($connection, $query);
-                while ($row = mysqli_fetch_assoc($query_run)) {
-                    if ($row['email'] == $_POST['email']) {
-                        $loginID = $row['loginID'];
-                        $query2 = "select * from auth where loginID = '$loginID'";
-                        $query_run2 = mysqli_query($connection, $query2);
-                        $row2 = mysqli_fetch_assoc($query_run2);
-                        if ($row2['password'] == $_POST['password']) {
-                            $_SESSION['fname'] = $row['fname'];
-                            $_SESSION['lname'] = $row['lname'];
-                            $_SESSION['name'] = $row['fname'] . " " . $row['lname'];
-                            $_SESSION['email'] = $row['email'];
-                            $_SESSION['id'] = $row['id'];
-                            $_SESSION['who'] = "admin";
-                            echo "<script>localStorage.setItem('adminID', '{$_SESSION['id']}');</script>";
-                            header("Location: admin/admin_dashboard.php");
-                        } else {
-                            echo '<br><br><center><span class="alert-danger">Wrong Password !!</span></center>';
-                        }
-                    }
-                }
-            }
-
-            if (isset($_POST['logout'])) {
-                session_destroy();
-                echo "<script>localStorage.removeItem('adminID'); window.location.href = 'index.php';</script>";
-            }
-            ?>
+            <div class="col-md-4"></div>
         </div>
     </div>
 </body>
